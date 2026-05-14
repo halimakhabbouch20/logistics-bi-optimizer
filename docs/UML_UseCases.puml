@@ -1,0 +1,93 @@
+@startuml LogisticsBI_Use_Cases
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam actorBorderColor #333333
+skinparam actorFontColor #000000
+skinparam usecaseBorderColor #666666
+skinparam usecaseFontColor #000000
+skinparam arrowColor #666666
+
+actor Customer
+actor Driver
+actor Manager
+actor Admin
+
+package "Order Management" {
+  usecase UC1 as "Create Order"
+  usecase UC2 as "Track Delivery"
+  usecase UC3 as "Cancel Order"
+  usecase UC4 as "Rate Delivery"
+}
+
+package "Delivery Operations" {
+  usecase UC5 as "Assign Delivery"
+  usecase UC6 as "Update Location (GPS)"
+  usecase UC7 as "Complete Delivery"
+  usecase UC8 as "Record Issue"
+}
+
+package "Route Optimization" {
+  usecase UC9 as "Optimize Route"
+  usecase UC10 as "Plan Route"
+  usecase UC11 as "View Route Details"
+}
+
+package "Analytics & Reporting" {
+  usecase UC12 as "View Dashboard"
+  usecase UC13 as "Generate Report"
+  usecase UC14 as "Predict Delays"
+  usecase UC15 as "Forecast Demand"
+}
+
+package "Fleet Management" {
+  usecase UC16 as "Schedule Maintenance"
+  usecase UC17 as "Track Vehicle"
+  usecase UC18 as "Manage Drivers"
+}
+
+package "Financial" {
+  usecase UC19 as "Calculate Cost"
+  usecase UC20 as "Generate Invoice"
+  usecase UC21 as "Record Payment"
+}
+
+package "Administration" {
+  usecase UC22 as "Manage Users"
+  usecase UC23 as "Configure Settings"
+  usecase UC24 as "Monitor System"
+}
+
+Customer -- UC1
+Customer -- UC2
+Customer -- UC3
+Customer -- UC4
+
+Driver -- UC6
+Driver -- UC7
+Driver -- UC8
+Driver -- UC2
+
+Manager -- UC5
+Manager -- UC9
+Manager -- UC10
+Manager -- UC12
+Manager -- UC13
+Manager -- UC14
+Manager -- UC15
+Manager -- UC18
+Manager -- UC19
+Manager -- UC20
+
+Admin -- UC22
+Admin -- UC23
+Admin -- UC24
+Admin -- UC16
+
+UC1 --> UC5 : leads to
+UC5 --> UC9 : uses
+UC9 --> UC10 : refines
+UC7 --> UC19 : triggers
+UC19 --> UC20 : generates
+UC6 --> UC14 : provides data
+
+@enduml

@@ -1,0 +1,58 @@
+@startuml LogisticsBI_Sequence_Delivery
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam actorBorderColor #333333
+skinparam actorFontColor #000000
+skinparam participantBorderColor #666666
+skinparam participantFontColor #000000
+skinparam arrowColor #666666
+
+actor Customer
+participant "Web App"
+participant "API Server"
+participant "Database"
+participant "GPS Service"
+actor Driver
+participant "Mobile App"
+
+autonumber
+
+Customer -> "Web App": Create Order
+"Web App" -> "API Server": POST /orders
+"API Server" -> "Database": Save Order
+"Database" --> "API Server": Order Created (ID)
+"API Server" --> "Web App": Response
+"Web App" --> Customer: Order Confirmation
+
+Customer -> "Web App": Request Delivery Tracking
+"Web App" -> "API Server": GET /deliveries/:id/tracking
+"API Server" -> "GPS Service": Get Current Location
+
+Driver -> "Mobile App": Start Delivery
+"Mobile App" -> "API Server": PATCH /deliveries/:id
+"API Server" -> "Database": Update Status
+"Database" --> "API Server": Status Updated
+"API Server" -> "GPS Service": Enable Location Tracking
+
+loop Every 5 seconds
+  Driver -> "Mobile App": Send GPS Location
+  "Mobile App" -> "API Server": POST /tracking
+  "API Server" -> "Database": Store Location
+  "API Server" -> "GPS Service": Update Map
+end
+
+"API Server" --> "Web App": WebSocket: Location Update
+"Web App" --> Customer: Update Map (Real-time)
+
+Driver -> "Mobile App": Mark Delivered
+"Mobile App" -> "API Server": PUT /deliveries/:id/complete
+"API Server" -> "Database": Update Delivery Status
+"API Server" -> "Database": Calculate Cost
+"Database" --> "API Server": Delivery Completed
+"API Server" --> "Mobile App": Confirmation
+
+"API Server" -> "Database": Generate Invoice
+"API Server" --> "Web App": Notification
+"Web App" --> Customer: Delivery Completed
+
+@enduml

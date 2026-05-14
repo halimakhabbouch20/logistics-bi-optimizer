@@ -1,0 +1,70 @@
+@startuml LogisticsBI_Deployment_Diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam nodeBorderColor #333333
+skinparam nodeFontColor #000000
+skinparam arrowColor #666666
+
+cloud "Internet" as INTERNET
+node "Load Balancer" as LB {
+  component [Nginx]
+}
+
+node "Kubernetes Cluster" as K8S {
+  node "API Pods" as API_PODS {
+    component [Backend Pod 1]
+    component [Backend Pod 2]
+    component [Backend Pod 3]
+  }
+  
+  node "Web Pods" as WEB_PODS {
+    component [Frontend Pod 1]
+    component [Frontend Pod 2]
+  }
+  
+  node "Data Services" as DATA_SVC {
+    database [PostgreSQL]
+    database [Redis]
+    database [TimescaleDB]
+  }
+  
+  node "BI Services" as BI_SVC {
+    component [Apache Superset]
+    component [Airflow Scheduler]
+  }
+  
+  node "AI Services" as AI_SVC {
+    component [ML Models]
+    component [Prediction Engine]
+  }
+}
+
+node "External Services" as EXTERNAL {
+  component [Google Maps]
+  component [Weather API]
+  component [SMS Gateway]
+}
+
+node "Monitoring" as MONITORING {
+  component [Prometheus]
+  component [Grafana]
+  component [ELK Stack]
+}
+
+INTERNET --> LB
+LB --> API_PODS
+LB --> WEB_PODS
+
+API_PODS --> DATA_SVC
+WEB_PODS --> API_PODS
+BI_SVC --> DATA_SVC
+AI_SVC --> DATA_SVC
+
+API_PODS --> EXTERNAL
+AI_SVC --> EXTERNAL
+
+API_PODS --> MONITORING
+DATA_SVC --> MONITORING
+BI_SVC --> MONITORING
+
+@enduml

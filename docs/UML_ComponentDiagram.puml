@@ -1,0 +1,105 @@
+@startuml LogisticsBI_Component_Diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam componentBorderColor #333333
+skinparam componentFontColor #000000
+skinparam arrowColor #666666
+
+package "Client Layer" {
+  component [Web Dashboard] as WEB
+  component [Mobile App] as MOBILE
+}
+
+package "API Gateway" {
+  component [Express.js API] as API
+  component [Authentication] as AUTH
+  component [Rate Limiter] as RATE
+  component [Logger] as LOG
+}
+
+package "Business Logic Layer" {
+  component [Delivery Service] as DELSVC
+  component [Route Service] as ROUTESVC
+  component [Analytics Service] as ANASVC
+  component [Prediction Service] as PREDSVC
+  component [Cost Calculator] as COST
+  component [Notification Service] as NOTIF
+}
+
+package "Data Access Layer" {
+  component [Order Repository] as ORDERREPO
+  component [Delivery Repository] as DELREPO
+  component [Vehicle Repository] as VEHICLEREPO
+  component [User Repository] as USERREPO
+}
+
+package "Data Layer" {
+  database [PostgreSQL] as PG
+  database [Redis Cache] as REDIS
+  database [TimescaleDB] as TSDB
+}
+
+package "External Services" {
+  component [Google Maps API] as MAPS
+  component [Weather API] as WEATHER
+  component [SMS Provider] as SMS
+  component [Email Service] as EMAIL
+}
+
+package "BI & Analytics" {
+  component [Apache Superset] as SUPERSET
+  component [Data Warehouse] as DW
+  component [ETL Pipeline] as ETL
+}
+
+package "AI/ML" {
+  component [Delay Predictor] as DELAYML
+  component [Route Optimizer] as ROUTEML
+  component [Demand Forecast] as DEMANDML
+}
+
+WEB --> API
+MOBILE --> API
+
+API --> AUTH
+API --> RATE
+API --> LOG
+
+API --> DELSVC
+API --> ROUTESVC
+API --> ANASVC
+API --> COST
+API --> NOTIF
+
+DELSVC --> ORDERREPO
+DELSVC --> DELREPO
+DELSVC --> COST
+DELSVC --> PRED SVC
+
+ROUTESVC --> VEHICLEREPO
+ROUTESVC --> ROUTEML
+ROUTESVC --> MAPS
+
+ANASVC --> PG
+ANASVC --> DW
+ANASVC --> SUPERSET
+
+PREDSVC --> DELAYML
+PREDSVC --> WEATHER
+
+NOTIF --> SMS
+NOTIF --> EMAIL
+
+ORDERREPO --> PG
+DELREPO --> PG
+DELREPO --> REDIS
+VEHICLEREPO --> PG
+USERREPO --> PG
+
+ETL --> PG
+ETL --> DW
+ETL --> TSDB
+
+DW --> SUPERSET
+
+@enduml

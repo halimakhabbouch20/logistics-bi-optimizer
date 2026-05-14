@@ -1,0 +1,54 @@
+@startuml LogisticsBI_State_Diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam stateBorderColor #333333
+skinparam stateFontColor #000000
+skinparam arrowColor #666666
+
+state "Order States" as ORDER_STATES {
+  [*] --> Pending
+  Pending --> Confirmed: Confirm Order
+  Confirmed --> Assigned: Assign Delivery
+  Assigned --> InTransit: Start Delivery
+  InTransit --> Delivered: Complete Delivery
+  Delivered --> [*]
+  
+  Pending --> Cancelled: Cancel Order
+  Confirmed --> Cancelled: Cancel Order
+  Cancelled --> [*]
+}
+
+state "Delivery States" as DEL_STATES {
+  [*] --> Pending
+  Pending --> Assigned: Driver Assigned
+  Assigned --> InTransit: Start Delivery
+  InTransit --> Delivered: Complete Delivery
+  Delivered --> [*]
+  
+  Pending --> Failed: Order Cancelled
+  InTransit --> Failed: Delivery Failed
+  Failed --> [*]
+}
+
+state "Vehicle States" as VEH_STATES {
+  [*] --> Available
+  Available --> InUse: Assign Delivery
+  InUse --> Available: Delivery Complete
+  Available --> Maintenance: Schedule Maintenance
+  Maintenance --> Available: Maintenance Complete
+  Maintenance --> Inactive: Vehicle Retired
+  Inactive --> [*]
+}
+
+state "Driver States" as DRV_STATES {
+  [*] --> Available
+  Available --> OnDelivery: Accept Delivery
+  OnDelivery --> OnDelivery: Update Location
+  OnDelivery --> Available: Complete Delivery
+  Available --> Break: Take Break
+  Break --> Available: Resume Work
+  Available --> Offline: End Shift
+  Offline --> [*]
+}
+
+@enduml

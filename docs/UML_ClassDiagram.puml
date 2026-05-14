@@ -1,0 +1,315 @@
+@startuml LogisticsBI_Class_Diagram
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam classBorderColor #333333
+skinparam classFontColor #000000
+skinparam arrowColor #666666
+
+' Entités Utilisateurs
+class User {
+  - id: UUID
+  - email: string
+  - password: string (hashed)
+  - firstName: string
+  - lastName: string
+  - role: enum [admin, manager, driver, customer]
+  - phone: string
+  - status: enum [active, inactive, suspended]
+  - createdAt: datetime
+  - updatedAt: datetime
+  --
+  + login()
+  + logout()
+  + updateProfile()
+  + changePassword()
+}
+
+class Driver extends User {
+  - licenseNumber: string
+  - licenseExpiry: date
+  - vehicleId: UUID
+  - currentStatus: enum [available, on_delivery, break, offline]
+  - totalDeliveries: int
+  - rating: decimal
+  - experience: int
+  --
+  + updateLocation()
+  + acceptDelivery()
+  + completeDelivery()
+}
+
+class Customer extends User {
+  - companyName: string
+  - segment: enum [premium, standard, basic]
+  - subscription: string
+  - contractStartDate: date
+  - contractEndDate: date
+  --
+  + createOrder()
+  + trackDelivery()
+  + getInvoices()
+}
+
+class Manager extends User {
+  - department: string
+  - supervisedTeam: int
+  --
+  + viewAnalytics()
+  + assignDeliveries()
+  + generateReports()
+}
+
+' Entités Commandes et Livraisons
+class Order {
+  - id: UUID
+  - customerId: UUID
+  - orderDate: datetime
+  - pickupLocation: Location
+  - deliveryLocation: Location
+  - items: Item[]
+  - totalWeight: decimal
+  - totalVolume: decimal
+  - totalAmount: decimal
+  - status: enum [pending, confirmed, assigned, in_transit, delivered, cancelled]
+  - expectedDeliveryDate: date
+  --
+  + calculateCost()
+  + assignDelivery()
+  + cancel()
+}
+
+class Delivery {
+  - id: UUID
+  - orderId: UUID
+  - vehicleId: UUID
+  - driverId: UUID
+  - routeId: UUID
+  - origin: Location
+  - destination: Location
+  - startTime: datetime
+  - endTime: datetime
+  - estimatedDuration: int
+  - actualDuration: int
+  - distance: decimal
+  - status: enum [pending, assigned, in_transit, delivered, failed]
+  - proof: string (image/signature)
+  - feedback: string
+  --
+  + startDelivery()
+  + updateLocation()
+  + completeDelivery()
+  + getTrackingHistory()
+}
+
+class DeliveryStop {
+  - id: UUID
+  - deliveryId: UUID
+  - sequence: int
+  - location: Location
+  - arrivalTime: datetime
+  - departureTime: datetime
+  - status: enum [pending, visited, failed]
+  - notes: string
+  --
+  + markAsVisited()
+  + recordIssue()
+}
+
+' Entités Véhicules
+class Vehicle {
+  - id: UUID
+  - registrationNumber: string
+  - type: enum [van, truck, motorcycle, car]
+  - capacity: decimal
+  - currentLocation: Location
+  - status: enum [available, in_use, maintenance, inactive]
+  - fuelType: enum [diesel, gasoline, electric, hybrid]
+  - purchaseDate: date
+  - lastMaintenanceDate: date
+  --
+  + updateLocation()
+  + scheduleMaintenance()
+  + getMaintenanceHistory()
+}
+
+class MaintenanceRecord {
+  - id: UUID
+  - vehicleId: UUID
+  - date: datetime
+  - type: enum [preventive, corrective, inspection]
+  - cost: decimal
+  - notes: string
+  - nextDueDate: date
+}
+
+' Entités Routes et Géolocalisation
+class Route {
+  - id: UUID
+  - vehicleId: UUID
+  - startLocation: Location
+  - endLocation: Location
+  - stops: DeliveryStop[]
+  - plannedDistance: decimal
+  - actualDistance: decimal
+  - plannedDuration: int
+  - actualDuration: int
+  - status: enum [planned, in_progress, completed, cancelled]
+  - optimizationScore: decimal
+  --
+  + optimizeRoute()
+  + addStop()
+  + removeStop()
+  + calculateMetrics()
+}
+
+class Location {
+  - id: UUID
+  - address: string
+  - city: string
+  - province: string
+  - postalCode: string
+  - latitude: decimal
+  - longitude: decimal
+  - type: enum [depot, pickup, delivery, warehouse]
+  --
+  + validateAddress()
+  + calculateDistance(to: Location)
+}
+
+class GPSTracking {
+  - id: UUID
+  - deliveryId: UUID
+  - vehicleId: UUID
+  - latitude: decimal
+  - longitude: decimal
+  - speed: decimal
+  - heading: decimal
+  - accuracy: decimal
+  - timestamp: datetime
+  --
+  + recordLocation()
+  + getTrack()
+}
+
+' Entités Coûts et Facturations
+class CostCalculation {
+  - id: UUID
+  - deliveryId: UUID
+  - baseRate: decimal
+  - distanceCost: decimal
+  - timeCost: decimal
+  - surcharge: decimal
+  - discount: decimal
+  - totalCost: decimal
+  - costPerKm: decimal
+  --
+  + calculateCost()
+  + applyDiscount()
+}
+
+class Invoice {
+  - id: UUID
+  - customerId: UUID
+  - invoiceDate: date
+  - period: string
+  - deliveries: Delivery[]
+  - totalAmount: decimal
+  - status: enum [draft, sent, paid, overdue]
+  - dueDate: date
+  - paymentDate: date
+  --
+  + generate()
+  + send()
+  + recordPayment()
+}
+
+' Entités Analytics
+class KPI {
+  - id: UUID
+  - metricType: enum [delivery_time, cost, success_rate, driver_performance]
+  - period: enum [daily, weekly, monthly]
+  - value: decimal
+  - target: decimal
+  - status: enum [on_track, at_risk, behind]
+  - timestamp: datetime
+  --
+  + calculate()
+  + compareTrend()
+}
+
+class Analytics {
+  - id: UUID
+  - startDate: date
+  - endDate: date
+  - totalDeliveries: int
+  - successRate: decimal
+  - averageDeliveryTime: decimal
+  - costPerDelivery: decimal
+  - topDrivers: Driver[]
+  --
+  + generateReport()
+  + exportData()
+}
+
+' Modèles ML
+class DelayPredictionModel {
+  - id: UUID
+  - version: string
+  - modelType: string
+  - accuracy: decimal
+  - lastTrained: datetime
+  --
+  + predictDelay(delivery)
+  + getConfidence()
+  + retrain()
+}
+
+class RouteOptimizer {
+  - id: UUID
+  - algorithm: enum [genetic, simulated_annealing, tabu_search]
+  - iterations: int
+  - populationSize: int
+  --
+  + optimize(stops, vehicles)
+  + calculateCost(route)
+  + validateConstraints()
+}
+
+class DemandForecast {
+  - id: UUID
+  - region: string
+  - forecastDate: date
+  - expectedOrders: int
+  - confidence: decimal
+  - factors: string[]
+  --
+  + forecast(period)
+  + updateModel()
+}
+
+' Relations
+User "1" -- "*" Order : creates
+Order "1" -- "1" Delivery : generates
+Order "1" -- "*" Item : contains
+Delivery "1" -- "*" DeliveryStop : has
+Delivery "*" -- "1" Vehicle : uses
+Delivery "*" -- "1" Driver : assignedTo
+Delivery "*" -- "1" Route : followsRoute
+Vehicle "1" -- "*" MaintenanceRecord : has
+Vehicle "*" -- "1" Location : located_at
+Delivery "*" -- "1" Location : originLocation
+Delivery "*" -- "1" Location : destinationLocation
+Route "*" -- "1" Vehicle : assigned_to
+Route "*" -- "*" DeliveryStop : includes
+GPSTracking "*" -- "1" Delivery : tracks
+GPSTracking "*" -- "1" Vehicle : tracks
+Delivery "1" -- "1" CostCalculation : has
+Delivery "*" -- "1" Invoice : billed_in
+Customer "1" -- "*" Invoice : receives
+Delivery "*" -- "1" KPI : contributes_to
+Analytics "*" -- "*" KPI : aggregates
+Delivery "*" -- "1" DelayPredictionModel : predicts
+Route "*" -- "1" RouteOptimizer : optimized_by
+Customer "1" -- "*" DemandForecast : related_to
+
+@enduml
